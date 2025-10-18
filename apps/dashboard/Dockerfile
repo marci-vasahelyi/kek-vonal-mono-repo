@@ -12,6 +12,6 @@ COPY . .
 # Expose Streamlit default port
 EXPOSE 8501
 
-# Run Streamlit with base URL path for reverse proxy
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true", "--server.baseUrlPath=/dashboard"]
+# Run Streamlit (baseUrlPath configured in .streamlit/config.toml)
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
 
