@@ -69,7 +69,7 @@ kek-vonal-mono-repo/
 
 2. **Set up environment variables:**
    ```bash
-   cp ENV_TEMPLATE.txt .env
+   cp .env.example .env
    # Edit .env with your values
    # ⚠️ IMPORTANT: Set DASHBOARD_PASSWORD for dashboard access
    ```
