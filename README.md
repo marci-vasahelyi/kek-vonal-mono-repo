@@ -8,6 +8,7 @@ This monorepo contains everything needed to run and restore the KEK-VONAL infras
 
 - **Directus CMS** - Headless CMS for content management
 - **n8n** - Workflow automation tool
+- **Dashboard** - Streamlit-based analytics and visualization dashboard
 - **PostgreSQL + PostGIS** - Database with geographic extensions
 - **Redis** - Caching layer
 - **Nginx** - Reverse proxy with SSL termination
@@ -23,9 +24,15 @@ kek-vonal-mono-repo/
 │   │   │   ├── endpoints/     # API endpoints
 │   │   │   └── operations/    # Custom operations
 │   │   └── uploads/           # User uploaded files
-│   └── n8n/
-│       ├── workflows/         # Exported n8n workflows
-│       └── README.md          # n8n documentation
+│   ├── n8n/
+│   │   ├── workflows/         # Exported n8n workflows
+│   │   └── README.md          # n8n documentation
+│   └── dashboard/
+│       ├── app.py             # Main Streamlit app
+│       ├── data_loader.py     # Database connection
+│       ├── visualizations.py  # Chart functions
+│       ├── Dockerfile         # Dashboard container
+│       └── README.md          # Dashboard documentation
 ├── infrastructure/
 │   ├── nginx/
 │   │   ├── sites-available/   # Nginx site configurations
@@ -74,6 +81,7 @@ kek-vonal-mono-repo/
 4. **Access the applications:**
    - Directus: http://localhost:8055
    - n8n: http://localhost:5678
+   - Dashboard: http://localhost:8501
 
 5. **Import n8n workflows** (optional):
    - See [apps/n8n/README.md](apps/n8n/README.md) for workflow setup
@@ -134,11 +142,13 @@ Workflow automation tool for data exports and integrations.
 Interactive data visualization dashboard for mental health contact analytics.
 
 **Local**: http://localhost:8501 (Streamlit)  
-**Production**: Not yet deployed
+**Production**: https://jegyzokonyv.kek-vonal.cc/dashboard/
 
 - Real-time PostgreSQL data visualization
-- Monthly trends, demographics, channels, topics
-- Built with Streamlit + Plotly
+- Filters: date range, főtéma, altéma, csatorna, életkor, nemi identitás
+- Monthly trends for 6 key mental health topics
+- Demographics, channels, and topics distribution
+- Built with Streamlit + Plotly + Docker
 - See [apps/dashboard/README.md](apps/dashboard/README.md) for usage
 
 ## 💾 Backups and Restore
