@@ -142,8 +142,8 @@ Workflow automation tool for data exports and integrations.
 
 Interactive data visualization dashboard for mental health contact analytics.
 
-**Local**: http://localhost:8501 (Streamlit)  
-**Production**: https://jegyzokonyv.kek-vonal.cc/dashboard/
+**Local**: http://localhost:8501 
+**Production**: http://jegyzokonyv.kek-vonal.cc:8501 (direct port access)
 
 - Real-time PostgreSQL data visualization
 - Filters: date range, főtéma, altéma, csatorna, életkor, nemi identitás

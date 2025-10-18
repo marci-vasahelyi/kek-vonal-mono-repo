@@ -14,13 +14,8 @@ load_dotenv()
 
 def get_db_connection():
     """Create database connection using credentials from .env"""
-    # For local development, use localhost instead of Docker network IP
-    db_host = os.getenv('DB_HOST', 'localhost')
-    if db_host == '192.168.1.100':
-        db_host = 'localhost'  # Docker network IP doesn't work from host machine
-    
     return psycopg2.connect(
-        host=db_host,
+        host=os.getenv('DB_HOST', '192.168.1.100'),
         port=os.getenv('DB_PORT', '5432'),
         database=os.getenv('POSTGRES_DB', 'directus'),
         user=os.getenv('POSTGRES_USER', 'directus'),
