@@ -1,0 +1,14 @@
+# Local development overrides
+# This file overrides settings for local development
+# It's automatically loaded by docker-compose
+
+version: "3"
+
+services:
+  n8n:
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PROTOCOL=http
+      - N8N_PATH=
+      - N8N_BASIC_AUTH_ACTIVE=false
+      - WEBHOOK_URL=http://localhost:5678/

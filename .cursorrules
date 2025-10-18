@@ -1,0 +1,16 @@
+ Important: try to fix things at the cause, not the symptom. 
+
+  Be very detailed with summarization and do not miss out things that are important. 
+
+  Write better code.
+
+
+  - When a fault, error, failure, or unexpected output is experienced:
+  - Attempt a maximum of one fix at a time
+  - Validate if that fix has resolved the issue
+  - If that fix failed to resolve the issue, undo the fix, and reset the fix counter
+  - Reevaluate the issue ensuring you make use of detailed line-by-line analysis
+  - Continue to iterate on the above steps as required until the issue is resolved.
+
+
+  KISS and YAGNI

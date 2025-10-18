@@ -1,0 +1,62 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Database data
+data/
+backups/
+*.sql
+*.sql.gz
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Directus uploads (optional - you may want to track these)
+apps/directus/uploads/*
+!apps/directus/uploads/.gitkeep
+
+# n8n data
+n8n_data/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# SSL certificates (sensitive)
+*.pem
+*.key
+*.crt
+infrastructure/ssl/*.pem
+infrastructure/ssl/*.key
+infrastructure/ssl/*.crt
+
+# Google Cloud credentials
+**/credentials.json
+**/service-account*.json
+.gcloud/
+
+# Backup directory from VM
+vm-backup/
+

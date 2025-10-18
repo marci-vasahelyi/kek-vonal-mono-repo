@@ -1,0 +1,95 @@
+version: "3"
+
+services:
+  database:
+    container_name: database
+    image: postgis/postgis:13-master
+    ports:
+      - ${DB_PORT}:5432
+    volumes:
+      - ./data/database:/var/lib/postgresql/data
+    networks:
+      directus:
+        ipv4_address: ${DB_HOST}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: ${TZ}
+      PGTZ: ${PGTZ}
+
+  cache:
+    container_name: cache
+    image: redis:6
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - directus
+
+  directus:
+    container_name: directus
+    image: directus/directus:latest
+    ports:
+      - 8055:8055
+    volumes:
+      - ./apps/directus/uploads:/directus/uploads
+      - ./apps/directus/extensions/endpoints:/directus/extensions/endpoints
+      - ./apps/directus/extensions/operations:/directus/extensions/operations
+    depends_on:
+      - cache
+      - database
+    networks:
+      - directus
+    environment:
+      KEY: ${DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET}
+      DB_CLIENT: "pg"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      CACHE_ENABLED: "true"
+      CACHE_STORE: "redis"
+      CACHE_REDIS: ${CACHE_REDIS}
+      REDIS_HOST: ${REDIS_HOST}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      EXTENSIONS_AUTO_RELOAD: "true"
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_TRANSPORT: ${EMAIL_TRANSPORT}
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT}
+      EMAIL_SMTP_USER: ${EMAIL_SMTP_USER}
+      EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD}
+      PUBLIC_URL: ${PUBLIC_URL}
+      REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL}
+
+  n8n:
+    container_name: n8n
+    image: n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+      - N8N_PATH=${N8N_PATH}
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - WEBHOOK_URL=${N8N_WEBHOOK_URL}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - directus
+
+networks:
+  directus:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24 # Define a custom subnet for static IP assignment
+
+volumes:
+  n8n_data:
