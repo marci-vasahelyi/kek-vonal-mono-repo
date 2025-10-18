@@ -32,6 +32,30 @@ server {
         proxy_read_timeout 60s;
     }
 
+    location /dashboard/ {
+        proxy_pass http://localhost:8501/;
+        include proxy_params;
+
+        # WebSocket headers (required for Streamlit)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # Additional headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Disable buffering for real-time updates
+        proxy_buffering off;
+
+        # Timeout settings
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
     listen [::]:443 ssl ipv6only=on; # managed by Certbot
     listen 443 ssl; # managed by Certbot
     ssl_certificate /etc/letsencrypt/live/jegyzokonyv.kek-vonal.cc/fullchain.pem; # managed by Certbot

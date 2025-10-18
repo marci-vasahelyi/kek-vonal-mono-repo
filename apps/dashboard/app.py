@@ -17,19 +17,19 @@ st.set_page_config(
 )
 
 # Title
-st.title("📊 Kék Vonal - Kapcsolatok Dashboard")
+st.title("📊 Kék Vonal - Megkeresések Dashboard")
 
 # Sidebar filters
 st.sidebar.header("Szűrők")
 
 # Date range
-default_start = datetime.now() - timedelta(days=30)
+default_start = datetime.now() - timedelta(days=365)  # Last year
 default_end = datetime.now()
 
 start_date = st.sidebar.date_input("Kezdő dátum", default_start)
 end_date = st.sidebar.date_input("Befejező dátum", default_end)
 
-# Load data
+# Load initial data
 with st.spinner("Adatok betöltése..."):
     df = load_data(start_date=start_date, end_date=end_date)
 
@@ -37,38 +37,126 @@ if df.empty:
     st.error("Nincs adat a kiválasztott időszakra")
     st.stop()
 
+# Extract all unique values for filters
+def extract_topics(df, column):
+    """Extract unique topics from semicolon-separated column"""
+    all_topics = set()
+    for topics in df[column].dropna():
+        if isinstance(topics, str):
+            all_topics.update([t.strip() for t in topics.split(';') if t.strip()])
+    return sorted(list(all_topics))
+
+# Get unique values for filters
+unique_channels = ['Összes'] + sorted(df['csatorna'].dropna().unique().tolist())
+unique_fotema = ['Összes'] + extract_topics(df, 'temak_listanezet')
+unique_altema = ['Összes'] + extract_topics(df, 'altemak_listanezet')
+unique_ages = ['Összes'] + sorted(df['eletkor'].dropna().unique().tolist())
+unique_genders = ['Összes'] + sorted(df['nemi_identitasa'].dropna().unique().tolist())
+
+# Filter controls
+st.sidebar.markdown("---")
+selected_channel = st.sidebar.selectbox("Csatorna", unique_channels)
+selected_fotema = st.sidebar.selectbox("Főtéma", unique_fotema)
+selected_altema = st.sidebar.selectbox("Altéma", unique_altema)
+selected_age = st.sidebar.selectbox("Életkor", unique_ages)
+selected_gender = st.sidebar.selectbox("Nemi identitás", unique_genders)
+
+# Apply filters
+df_filtered = df.copy()
+
+if selected_channel != 'Összes':
+    df_filtered = df_filtered[df_filtered['csatorna'] == selected_channel]
+
+if selected_fotema != 'Összes':
+    df_filtered = df_filtered[df_filtered['temak_listanezet'].str.contains(selected_fotema, na=False)]
+
+if selected_altema != 'Összes':
+    df_filtered = df_filtered[df_filtered['altemak_listanezet'].str.contains(selected_altema, na=False)]
+
+if selected_age != 'Összes':
+    df_filtered = df_filtered[df_filtered['eletkor'] == selected_age]
+
+if selected_gender != 'Összes':
+    df_filtered = df_filtered[df_filtered['nemi_identitasa'] == selected_gender]
+
+if df_filtered.empty:
+    st.warning("Nincs adat a kiválasztott szűrőkkel")
+    st.stop()
+
 # Show basic stats
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.metric("Összes kapcsolat", len(df))
+    st.metric("Összes megkeresés", len(df_filtered))
 
 with col2:
-    if 'csatorna' in df.columns:
-        unique_channels = df['csatorna'].nunique()
-        st.metric("Csatornák száma", unique_channels)
+    if 'csatorna' in df_filtered.columns:
+        unique_channels_count = df_filtered['csatorna'].nunique()
+        st.metric("Csatornák száma", unique_channels_count)
 
 with col3:
-    if 'nemi_identitasa' in df.columns:
-        unique_genders = df['nemi_identitasa'].nunique()
+    if 'nemi_identitasa' in df_filtered.columns:
+        unique_genders = df_filtered['nemi_identitasa'].nunique()
         st.metric("Nemi identitások", unique_genders)
 
 with col4:
-    if 'eletkor' in df.columns:
-        age_count = df['eletkor'].notna().sum()
+    if 'eletkor' in df_filtered.columns:
+        age_count = df_filtered['eletkor'].notna().sum()
         st.metric("Életkor kitöltve", age_count)
 
 st.markdown("---")
 
 # Tabs
-tab1, tab2, tab3 = st.tabs(["📈 Trendek", "📋 Csatornák", "🔍 Nyers Adatok"])
+tab1, tab2, tab3, tab4 = st.tabs(["🧠 Altémák", "📈 Trendek", "📋 Megoszlások", "🔍 Nyers Adatok"])
 
 with tab1:
-    st.subheader("Kapcsolatok időbeli alakulása")
+    st.subheader("Főbb Altémák témák időbeli alakulása")
     
-    if 'letrehozva' in df.columns and not df.empty:
+    # Define the 6 key topics to track
+    key_topics = [
+        "Általános lehangoltság",
+        "Szorongás, félelmek",
+        "Öngyilkossági gondolat",
+        "Önsértés",
+        "Evészavarok",
+        "Diagnosztizált pszichés betegség"
+    ]
+    
+    if 'letrehozva' in df_filtered.columns and 'altemak_listanezet' in df_filtered.columns and not df_filtered.empty:
+        # Prepare data for time series (using filtered data)
+        df_topics = df_filtered.copy()
+        df_topics['datum'] = pd.to_datetime(df_topics['letrehozva']).dt.to_period('M').dt.to_timestamp()
+        
+        # Count occurrences of each topic per month
+        topic_data = []
+        for topic in key_topics:
+            monthly_counts = df_topics[df_topics['altemak_listanezet'].str.contains(topic, na=False)].groupby('datum').size()
+            for date, count in monthly_counts.items():
+                topic_data.append({'Dátum': date, 'Téma': topic, 'Megkeresések': count})
+        
+        if topic_data:
+            df_plot = pd.DataFrame(topic_data)
+            
+            fig = px.line(
+                df_plot,
+                x='Dátum',
+                y='Megkeresések',
+                color='Téma',
+                title='Főbb altémák havi alakulása',
+                labels={'Megkeresések': 'Megkeresések száma', 'Téma': 'Téma'},
+                markers=True
+            )
+            fig.update_layout(height=500, hovermode='x unified')
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Nincs elegendő adat a kiválasztott témákhoz a szűrőkkel")
+
+with tab2:
+    st.subheader("Megkeresések időbeli alakulása")
+    
+    if 'letrehozva' in df_filtered.columns and not df_filtered.empty:
         # Group by date
-        df_daily = df.copy()
+        df_daily = df_filtered.copy()
         df_daily['datum'] = pd.to_datetime(df_daily['letrehozva']).dt.date
         daily_counts = df_daily.groupby('datum').size().reset_index(name='count')
         
@@ -76,41 +164,85 @@ with tab1:
             daily_counts, 
             x='datum', 
             y='count',
-            title='Napi kapcsolatok száma',
-            labels={'datum': 'Dátum', 'count': 'Kapcsolatok száma'}
+            title='Napi Megkeresések száma',
+            labels={'datum': 'Dátum', 'count': 'Megkeresések száma'}
         )
         st.plotly_chart(fig, use_container_width=True)
 
-with tab2:
-    st.subheader("Csatornák megoszlása")
+with tab3:
+    st.subheader("Megoszlások")
     
-    if 'csatorna' in df.columns and not df.empty:
+    col1, col2 = st.columns(2)
+    
+    with col1:
         # Channel distribution
-        channel_counts = df['csatorna'].value_counts().reset_index()
-        channel_counts.columns = ['Csatorna', 'Darabszám']
-        
-        col1, col2 = st.columns([1, 1])
-        
-        with col1:
-            fig = px.pie(
-                channel_counts, 
-                values='Darabszám', 
-                names='Csatorna',
-                title='Csatornák eloszlása'
+        if 'csatorna' in df_filtered.columns and not df_filtered.empty:
+            channel_counts = df_filtered['csatorna'].value_counts().reset_index()
+            channel_counts.columns = ['Csatorna', 'Darabszám']
+            
+            fig = px.bar(
+                channel_counts,
+                x='Csatorna',
+                y='Darabszám',
+                title='Csatornák megoszlása',
+                color='Darabszám',
+                color_continuous_scale='Blues'
             )
             st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        # Age distribution
+        if 'eletkor' in df_filtered.columns and not df_filtered.empty:
+            age_counts = df_filtered['eletkor'].value_counts().reset_index()
+            age_counts.columns = ['Életkor', 'Darabszám']
+            age_counts = age_counts.head(10)  # Top 10
+            
+            fig = px.bar(
+                age_counts,
+                x='Életkor',
+                y='Darabszám',
+                title='Top 10 életkor kategória',
+                color='Darabszám',
+                color_continuous_scale='Greens'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+    
+    # Főtéma distribution
+    st.markdown("---")
+    if 'temak_listanezet' in df_filtered.columns:
+        st.subheader("Főtémák gyakorisága")
         
-        with col2:
-            st.dataframe(channel_counts, use_container_width=True, hide_index=True)
+        # Extract all topics
+        all_fotema = []
+        for topics in df_filtered['temak_listanezet'].dropna():
+            if isinstance(topics, str):
+                all_fotema.extend([t.strip() for t in topics.split(';') if t.strip()])
+        
+        if all_fotema:
+            fotema_counts = pd.Series(all_fotema).value_counts().reset_index()
+            fotema_counts.columns = ['Főtéma', 'Darabszám']
+            fotema_counts = fotema_counts.head(15)  # Top 15
+            
+            fig = px.bar(
+                fotema_counts,
+                x='Darabszám',
+                y='Főtéma',
+                orientation='h',
+                title='Top 15 főtéma',
+                color='Darabszám',
+                color_continuous_scale='Reds'
+            )
+            fig.update_layout(height=600)
+            st.plotly_chart(fig, use_container_width=True)
 
-with tab3:
+with tab4:
     st.subheader("Nyers adatok")
     
     # Show dataframe
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df_filtered, use_container_width=True, hide_index=True)
     
     # Download button
-    csv = df.to_csv(index=False).encode('utf-8')
+    csv = df_filtered.to_csv(index=False).encode('utf-8')
     st.download_button(
         label="📥 Letöltés CSV-ként",
         data=csv,

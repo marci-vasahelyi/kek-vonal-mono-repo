@@ -3,6 +3,9 @@
 .env.local
 .env.*.local
 
+# Docker overrides (local development only)
+docker-compose.override.yml
+
 # Database data
 data/
 backups/

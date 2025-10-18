@@ -84,6 +84,25 @@ services:
     networks:
       - directus
 
+  dashboard:
+    container_name: dashboard
+    build:
+      context: ./apps/dashboard
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8501:8501"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - database
+    networks:
+      - directus
+
 networks:
   directus:
     driver: bridge
