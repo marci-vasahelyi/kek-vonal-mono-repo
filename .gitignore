@@ -63,3 +63,11 @@ infrastructure/ssl/*.crt
 # Backup directory from VM
 vm-backup/
 
+
+# SSH credentials and sensitive connection info
+SSH-ACCESS.md
+**/ssh-config
+**/.ssh/
+
+# Security incident logs
+SECURITY-INCIDENT.md

@@ -22,12 +22,12 @@ If your server is completely lost or corrupted, follow these steps to restore ev
 2. **Set up SSH access:**
    ```bash
    # On your local machine
-   ssh-copy-id -p 2222 marci@NEW_SERVER_IP
+   ssh-copy-id -p ${SSH_PORT} ${SSH_USER}@NEW_SERVER_IP
    ```
 
 3. **Connect to the server:**
    ```bash
-   ssh -p 2222 marci@NEW_SERVER_IP
+   ssh -p ${SSH_PORT} ${SSH_USER}@NEW_SERVER_IP
    ```
 
 ### Step 2: Run Server Setup Script
@@ -36,10 +36,10 @@ On the new server:
 
 ```bash
 # Transfer the setup script
-scp -P 2222 scripts/deployment/setup-server.sh marci@NEW_SERVER_IP:/tmp/
+scp -P ${SSH_PORT} scripts/deployment/setup-server.sh ${SSH_USER}@NEW_SERVER_IP:/tmp/
 
 # SSH into the server
-ssh -p 2222 marci@NEW_SERVER_IP
+ssh -p ${SSH_PORT} ${SSH_USER}@NEW_SERVER_IP
 
 # Run the setup script
 sudo bash /tmp/setup-server.sh
@@ -57,7 +57,7 @@ From your local machine:
 
 ```bash
 # Create project directory on server
-ssh -p 2222 marci@NEW_SERVER_IP "sudo mkdir -p /home/kek-vonal-crm && sudo chown -R marci:marci /home/kek-vonal-crm"
+ssh -p ${SSH_PORT} ${SSH_USER}@NEW_SERVER_IP "sudo mkdir -p /home/kek-vonal-crm && sudo chown -R marci:marci /home/kek-vonal-crm"
 
 # Transfer the entire monorepo (excluding large files)
 rsync -avz --progress \
@@ -66,8 +66,8 @@ rsync -avz --progress \
   --exclude 'backups/' \
   --exclude 'vm-backup/' \
   --exclude '.git' \
-  -e "ssh -p 2222" \
-  ./ marci@NEW_SERVER_IP:/home/kek-vonal-crm/
+  -e "ssh -p ${SSH_PORT}" \
+  ./ ${SSH_USER}@NEW_SERVER_IP:/home/kek-vonal-crm/
 ```
 
 ### Step 4: Configure Environment
@@ -157,7 +157,7 @@ gsutil cp gs://kek-vonal-backup-bucket/directus_backup_YYYYMMDD.sql.gz ./backups
 
 ```bash
 # Transfer backup from your local machine
-scp -P 2222 path/to/local/backup.sql.gz marci@NEW_SERVER_IP:/home/kek-vonal-crm/backups/
+scp -P ${SSH_PORT} path/to/local/backup.sql.gz ${SSH_USER}@NEW_SERVER_IP:/home/kek-vonal-crm/backups/
 
 # Restore from backup
 ./scripts/restore/db-restore.sh backups/backup.sql.gz

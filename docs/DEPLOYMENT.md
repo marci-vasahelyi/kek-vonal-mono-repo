@@ -8,9 +8,11 @@ This infrastructure uses Docker Compose for container orchestration and Nginx as
 
 ## 🖥️ Current Production Environment
 
-- **Server**: 217.13.111.12
-- **SSH Port**: 2222
-- **User**: marci
+All production credentials are stored in `.env` file (gitignored):
+- **SSH_HOST**: Production server IP
+- **SSH_PORT**: SSH port (non-standard for security)
+- **SSH_USER**: SSH username
+- **Domain**: `jegyzokonyv.kek-vonal.cc`
 - **Domain**: jegyzokonyv.kek-vonal.cc
 - **Project Path**: `/home/kek-vonal-crm/`
 
@@ -21,8 +23,8 @@ This infrastructure uses Docker Compose for container orchestration and Nginx as
 For updating an already-running system:
 
 ```bash
-# SSH into server
-ssh -p 2222 marci@217.13.111.12
+# SSH into server (credentials from .env)
+ssh -p ${SSH_PORT} ${SSH_USER}@${SSH_HOST}
 
 # Navigate to project
 cd /home/kek-vonal-crm
@@ -30,8 +32,8 @@ cd /home/kek-vonal-crm
 # Pull latest changes (if using git)
 git pull
 
-# Or sync specific files
-rsync -avz -e "ssh -p 2222" ./docker-compose.yml marci@217.13.111.12:/home/kek-vonal-crm/
+# Or sync specific files (use credentials from .env)
+rsync -avz -e "ssh -p ${SSH_PORT}" ./docker-compose.yml ${SSH_USER}@${SSH_HOST}:/home/kek-vonal-crm/
 
 # Run deployment script
 ./scripts/deployment/deploy.sh
@@ -211,8 +213,8 @@ sudo systemctl reload nginx
 ### Updating Directus Extensions
 
 ```bash
-# Copy new extensions to apps/directus/extensions/
-rsync -avz -e "ssh -p 2222" ./apps/directus/extensions/ marci@217.13.111.12:/home/kek-vonal-crm/apps/directus/extensions/
+# Copy new extensions to apps/directus/extensions/ (use credentials from .env)
+rsync -avz -e "ssh -p ${SSH_PORT}" ./apps/directus/extensions/ ${SSH_USER}@${SSH_HOST}:/home/kek-vonal-crm/apps/directus/extensions/
 
 # Restart Directus
 docker-compose restart directus

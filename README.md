@@ -191,10 +191,12 @@ See [docs/DISASTER-RECOVERY.md](docs/DISASTER-RECOVERY.md) for complete recovery
 
 ## 🌐 Server Information
 
-- **IP Address**: `217.13.111.12`
-- **SSH Port**: `2222`
 - **Domain**: `jegyzokonyv.kek-vonal.cc`
-- **SSH Access**: `ssh -p 2222 marci@217.13.111.12`
+- **SSH Access**: See `.env` file for credentials (never commit to git!)
+  ```bash
+  # Get from .env file
+  ssh -p ${SSH_PORT} ${SSH_USER}@${SSH_HOST}
+  ```
 
 ## 📊 Monitoring
 
@@ -262,6 +264,8 @@ BACKUP_RETENTION_DAYS=14
 
 ## 📝 Additional Documentation
 
+- [MAINTENANCE.md](docs/MAINTENANCE.md) - Regular maintenance checklist
+- [SECURITY.md](docs/SECURITY.md) - Security guidelines and best practices
 - [DEPLOYMENT.md](docs/DEPLOYMENT.md) - Detailed deployment guide
 - [DISASTER-RECOVERY.md](docs/DISASTER-RECOVERY.md) - Complete recovery procedures
 - [NGINX-SETUP.md](docs/NGINX-SETUP.md) - Nginx and SSL configuration
