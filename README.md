@@ -129,6 +129,18 @@ Workflow automation tool for data exports and integrations.
 - Main workflow: hourly data export to Google Sheets
 - See [apps/n8n/README.md](apps/n8n/README.md) for detailed documentation
 
+### Dashboard
+
+Interactive data visualization dashboard for mental health contact analytics.
+
+**Local**: http://localhost:8501 (Streamlit)  
+**Production**: Not yet deployed
+
+- Real-time PostgreSQL data visualization
+- Monthly trends, demographics, channels, topics
+- Built with Streamlit + Plotly
+- See [apps/dashboard/README.md](apps/dashboard/README.md) for usage
+
 ## 💾 Backups and Restore
 
 ### Creating a Backup

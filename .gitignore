@@ -71,3 +71,19 @@ SSH-ACCESS.md
 
 # Security incident logs
 SECURITY-INCIDENT.md
+
+# Python virtual environments and cache
+venv/
+env/
+ENV/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Streamlit cache
+.streamlit/cache/
