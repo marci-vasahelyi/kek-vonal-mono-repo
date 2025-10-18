@@ -18,11 +18,14 @@ This monorepo contains everything needed to run and restore the KEK-VONAL infras
 ```
 kek-vonal-mono-repo/
 ├── apps/
-│   └── directus/
-│       ├── extensions/        # Custom Directus extensions
-│       │   ├── endpoints/     # API endpoints
-│       │   └── operations/    # Custom operations
-│       └── uploads/           # User uploaded files
+│   ├── directus/
+│   │   ├── extensions/        # Custom Directus extensions
+│   │   │   ├── endpoints/     # API endpoints
+│   │   │   └── operations/    # Custom operations
+│   │   └── uploads/           # User uploaded files
+│   └── n8n/
+│       ├── workflows/         # Exported n8n workflows
+│       └── README.md          # n8n documentation
 ├── infrastructure/
 │   ├── nginx/
 │   │   ├── sites-available/   # Nginx site configurations
@@ -72,6 +75,9 @@ kek-vonal-mono-repo/
    - Directus: http://localhost:8055
    - n8n: http://localhost:5678
 
+5. **Import n8n workflows** (optional):
+   - See [apps/n8n/README.md](apps/n8n/README.md) for workflow setup
+
 ### Production Deployment
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment instructions.
@@ -98,6 +104,30 @@ Nginx is configured as a reverse proxy with SSL termination:
 - SSL certificates managed by Let's Encrypt
 
 Configuration file: `infrastructure/nginx/sites-available/jegyzokonyv.kek-vonal.cc`
+
+## 📦 Applications
+
+### Directus
+
+Content management system for managing all application data.
+
+**Local**: http://localhost:8055  
+**Production**: https://jegyzokonyv.kek-vonal.cc
+
+- Default admin credentials in `.env` file
+- Custom extensions in `apps/directus/extensions/`
+- Uploaded files in `apps/directus/uploads/`
+
+### n8n
+
+Workflow automation tool for data exports and integrations.
+
+**Local**: http://localhost:5678 (no auth required)  
+**Production**: https://jegyzokonyv.kek-vonal.cc/n8n/ (basic auth required)
+
+- Workflows exported in `apps/n8n/workflows/`
+- Main workflow: hourly data export to Google Sheets
+- See [apps/n8n/README.md](apps/n8n/README.md) for detailed documentation
 
 ## 💾 Backups and Restore
 

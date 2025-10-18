@@ -1,0 +1,2410 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        912
+      ],
+      "id": "4974c875-befe-434e-b094-1463e64c6780",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM jegyzokonyv\nWHERE \n    letrehozva >= (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '62 minutes' AND \n    letrehozva < (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 minutes'\nGROUP BY id\nLIMIT 50;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        144,
+        -176
+      ],
+      "id": "b0918c75-4f04-4a83-9237-620751d867a3",
+      "name": "Postgres_Jegyzo",
+      "credentials": {
+        "postgres": {
+          "id": "3GNNGreiT9dnKJfx",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst fixedOutput = [{}];\n\nconst temak = [\n  {\n    fotema: \"Család\",\n    altemak: [\n      \"Beszélgetés a családról\",\n      \"Betegség a családban\",\n      \"Családi konfliktus\",\n      \"Családtagért érzett aggodalom\",\n      \"Családtag halála\",\n      \"Kisállattal kapcsolatos probléma vagy történet\",\n      \"Mozaikcsalád probléma\",\n      \"Szülők válnak, különélnek\",\n      \"Pszichiátriai vagy addiktológiai betegség a családban\",\n    ],\n  },\n  {\n    fotema: \"Párkapcsolat\",\n    altemak: [\n      \"Beszélgetés a párkapcsolatról\",\n      \"Ismerkedés, párválasztás\",\n      \"Konfliktusok a párkapcsolatban\",\n      \"Párkapcsolat kiskorú és felnőtt között\",\n      \"Szakítás\",\n      \"Tiltott-titkolt kapcsolat\",\n    ],\n  },\n  {\n    fotema: \"Iskola\",\n    altemak: [\n      \"Beszélgetés iskoláról\",\n      \"Konfliktus tanárokkal, szabályokkal\",\n      \"Szükségletre reagáló oktatás hiánya\",\n      \"Teljesítmény\",\n      \"Továbbtanulás\",\n    ],\n  },\n  {\n    fotema: \"Kortársak\",\n    altemak: [\n      \"Barátság elvesztése\",\n      \"Beszélgetés kortársakról, barátokról\",\n      \"Kortársak közötti konfliktusok\",\n      \"Sport, hobbi\",\n    ],\n  },\n  {\n    fotema: \"Bántalmazás, erőszak (offline)\",\n    altemak: [\n      \"Családon belüli bántalmazás más családtaggal szemben\",\n      \"Elhanyagolás családon belül\",\n      \"Elhanyagolás intézményben\",\n      \"Érzelmi bántalmazás a családon belül\",\n      \"Érzelmi bántalmazás egyéb színtéren\",\n      \"Érzelmi bántalmazás kortársak között\",\n      \"Érzelmi bántalmazás párkapcsolatban\",\n      \"Kapcsolati erőszak a szülők között\",\n      \"Közvetlen fizikai bántalmazás a családon belül\",\n      \"Közvetlen fizikai bántalmazás egyéb színtéren\",\n      \"Közvetlen fizikai bántalmazás intézményben felnőttektől\",\n      \"Közvetlen fizikai bántalmazás kortársak között\",\n      \"Közvetlen fizikai bántalmazás párkapcsolatban\",\n      \"Szexuális bántalmazás családon belül\",\n      \"Szexuális bántalmazás intézményben felnőttektől\",\n      \"Szexuális bántalmazás kortársak között\",\n      \"Szexuális bántalmazás máshol\",\n      \"Szexuális bántalmazás párkapcsolatban\",\n      \"Érzelmi bántalmazás intézményben\",\n    ],\n  },\n  {\n    fotema: \"Internet, mobil\",\n    altemak: [\n      \"Általános kérdés internetbiztonsággal kapcsolatban\",\n      \"Gaming\",\n      \"Internetfüggőség\",\n      \"Káros tartalmak\",\n      \"Online ismerkedés\",\n      \"AI-vel kapcsolatos tapasztalat, kérdés\",\n      \"AI (ChatGPT vagy egyéb AI alkalmazás) mint beszélgetőtárs\",\n    ],\n  },\n  {\n    fotema: \"Online bántalmazás, visszaélés\",\n    altemak: [\n      \"Adathalászat,adatokkal való visszaélés\",\n      \"Grooming\",\n      \"Gyermekkel való szexuális visszaélést ábrázoló tartalom\",\n      \"Internetes zaklatás, cyberbullying\",\n      \"Képpel való visszaélés\",\n      \"Sexting\",\n      \"Szextortion\",\n    ],\n  },\n  {\n    fotema: \"Önagresszió veszélye\",\n    altemak: [\n      \"Akut öngyilkossági kísérlet\",\n      \"Akut önsértés (nem szuicid szándékkal)\",\n      \"Öngyilkossági gondolat\",\n      \"Öngyilkossági késztetés\",\n      \"Önsértés\",\n      \"Önsértés gondolata\",\n      \"Egyéb Önagresszió\",\n    ],\n  },\n  {\n    fotema: \"Egészség-betegség\",\n    altemak: [\n      \"Agresszív késztetések\",\n      \"Általános lehangoltság\",\n      \"Bűntudat, megbánás\",\n      \"Diagnosztizált pszichés betegség\",\n      \"Evészavarok\",\n      \"Indulatkontroll zavar\",\n      \"Magány\",\n      \"Másért való aggódás\",\n      \"Önértékelési probléma\",\n      \"Öngyilkosság mint téma\",\n      \"Pánik jellegű tünetek\",\n      \"Pozitív érzelmek megosztás\",\n      \"Pszichés ellátás\",\n      \"Pszichés ellátás hiánya\",\n      \"Szomatikus betegség\",\n      \"Szorongás, félelmek\",\n      \"Veszteség, gyász\",\n      \"Vetélés\",\n    ],\n  },\n  {\n    fotema: \"Előítélet, diszkrimináció\",\n    altemak: [\n      \"Előítéletes hívó\",\n      \"Fogyatékosság\",\n      \"LMBTQIA\",\n      \"Menekült\",\n      \"Roma\",\n      \"Egyéb kisebbség\",\n    ],\n  },\n  {\n    fotema: \"Eltűnés, szökés, csellengés\",\n    altemak: [\n      \"Azon gondolkodik, hogy elszökik gyerekotthonból\",\n      \"Azon gondolkodik, hogy elszökik hivatásos nevelőszülőktől\",\n      \"Azon gondolkodik, hogy elszökik otthonról\",\n      \"Csellengés,iskolából lógás\",\n      \"Gyermekotthonból szökött\",\n      \"Jogellenes elvitel\",\n      \"Kísérő nélküli kiskorú\",\n      \"Nemzetközi gyermekeltűnés\",\n      \"Otthonról szökött\",\n      \"Egyéb eltűnés, szökés, csellengés\",\n    ],\n  },\n  {\n    fotema: \"Szerhasználat, függőség\",\n    altemak: [\n      \"Alkohollal való visszaélés, alkoholizmus\",\n      \"Buli-party ártalom\",\n      \"Cigarettázás\",\n      \"Drog kipróbálása\",\n      \"Drog rendszeres használata, drogfüggőség\",\n      \"Gyógyszerekkel való visszaélés\",\n      \"Szerencsejáték, játék\",\n      \"Pornográf tartalmak\",\n      \"Egyéb függőség\",\n    ],\n  },\n  {\n    fotema: \"Alapszükségletek\",\n    altemak: [\"Anyagi nehézség\", \"Lakhatási probléma,hajléktalanság\"],\n  },\n  {\n    fotema: \"Szexualitás\",\n    altemak: [\n      \"Abortusz\",\n      \"Első szexuális tapasztalatok\",\n      \"Fogamzásgátlás, védekezés\",\n      \"Menstruáció\",\n      \"Nemi identitás\",\n      \"Serdülőkori változások\",\n      \"Szexuális orientáció\",\n      \"Terhesség\",\n      \"Egyéb szexszel kapcsolatos kérdések\",\n    ],\n  },\n  {\n    fotema: \"Jogi probléma\",\n    altemak: [\n      \"Büntetendő tett áldozata\",\n      \"Büntetendő tett elkövetése\",\n      \"Büntetendő tett szemtanúja\",\n      \"Gyerekek kiemelése a családból\",\n      \"Gyerekvédelemmel kapcsolatos kérdés\",\n      \"Válással kapcsolatos jogi probléma\",\n    ],\n  },\n  {\n    fotema: \"Munka\",\n    altemak: [\"Diákmunka\", \"Munkát keres\", \"Probléma a munkahelyen\"],\n  },\n  {\n    fotema: \"Kék vonal\",\n    altemak: [\n      \"Keretek, szabályok\",\n      \"Kérdés\",\n      \"Panasz\",\n      \"Próba\",\n      \"Visszajelzés\",\n    ],\n  },\n];\n\nconst getFotema = (altema) => {\n  if (!altema) return \"\";\n\n  for (const tema of temak) {\n    if (tema.altemak.includes(altema)) {\n      return tema.fotema;\n    }\n  }\n\n  return \"\";\n};\n\nfor (const item of $input.all()) {\n  const altemakArray = item.json.altemak_listanezet.split(\"; \");\n  altemakArray.forEach((altema) => {\n    const data = {\n      \"Jegyzőkönyv Azonosító\": item.json.jegyzokonyv_azonosito,\n      \"Ügyelő Neve\": item.json.letrehozo_neve,\n      \"Csatorna\": item.json.csatorna,\n      \"Neme\": item.json.nemi_identitasa,\n      \"Életkora\": item.json.eletkor,\n      \"Rövid/Hosszú\":\n        item.json.rovid_hosszu === true ? \"Rövid\" : \"Hosszú\",\n      \"Megkereső Neve\": item.json.megkereso_neve,\n      \"Mióta Megkeresőnk\": item.json.miota_megkeresonk,\n      \"Létrehozva\": item.json.letrehozva,\n      \"Főtéma\": getFotema(altema),\n      \"Altéma\": altema,\n      \"Beszélgetés hossza\": item.json.hivas_hossza,\n      \"Kivel él\": item.json.kivel_el,\n      \"Milyen segítséget kapott\": item.json.segitseg_listanezet,\n    };\n  fixedOutput.push(data)\n  })\n}\n\nfixedOutput.shift();\n\nreturn fixedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -416
+      ],
+      "id": "1ac89002-9410-440d-9dfc-9f2c67ff7bc7",
+      "name": "Altemak"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ",
+          "mode": "list",
+          "cachedResultName": "Jegyzőkönyv adatok 2024.10-től",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "jegyzo_altemak",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Jegyzőkönyv Azonosító",
+              "displayName": "Jegyzőkönyv Azonosító",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ügyelő Neve",
+              "displayName": "Ügyelő Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Csatorna",
+              "displayName": "Csatorna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Neme",
+              "displayName": "Neme",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Életkora",
+              "displayName": "Életkora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rövid/Hosszú",
+              "displayName": "Rövid/Hosszú",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkereső Neve",
+              "displayName": "Megkereső Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mióta Megkeresőnk",
+              "displayName": "Mióta Megkeresőnk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Létrehozva",
+              "displayName": "Létrehozva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Főtéma",
+              "displayName": "Főtéma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Altéma",
+              "displayName": "Altéma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beszélgetés hossza",
+              "displayName": "Beszélgetés hossza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kivel él",
+              "displayName": "Kivel él",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        -416
+      ],
+      "id": "a9596ac0-fed4-4b38-abd0-ed847eed5a56",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fsinMfLSK3zax7c",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ",
+          "mode": "list",
+          "cachedResultName": "Jegyzőkönyv adatok 2024.10-től",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 671073918,
+          "mode": "list",
+          "cachedResultName": "jegyzo_fotemak",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit#gid=671073918"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Jegyzőkönyv Azonosító",
+              "displayName": "Jegyzőkönyv Azonosító",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ügyelő Neve",
+              "displayName": "Ügyelő Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Csatorna",
+              "displayName": "Csatorna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Neme",
+              "displayName": "Neme",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Életkora",
+              "displayName": "Életkora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rövid/Hosszú",
+              "displayName": "Rövid/Hosszú",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkereső Neve",
+              "displayName": "Megkereső Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mióta Megkeresőnk",
+              "displayName": "Mióta Megkeresőnk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Létrehozva",
+              "displayName": "Létrehozva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Főtéma",
+              "displayName": "Főtéma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beszélgetés hossza",
+              "displayName": "Beszélgetés hossza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kivel él",
+              "displayName": "Kivel él",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        -256
+      ],
+      "id": "7300d833-76b3-49ff-af34-e5ba68538cc2",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fsinMfLSK3zax7c",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ",
+          "mode": "list",
+          "cachedResultName": "Jegyzőkönyv adatok 2024.10-től",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1867637896,
+          "mode": "list",
+          "cachedResultName": "jegyzo_sima",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit#gid=1867637896"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Jegyzőkönyv Azonosító",
+              "displayName": "Jegyzőkönyv Azonosító",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkereső Neve",
+              "displayName": "Megkereső Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Csatorna",
+              "displayName": "Csatorna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beszélgetés hossza",
+              "displayName": "Beszélgetés hossza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Létrehozva",
+              "displayName": "Létrehozva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ügyelő Neve",
+              "displayName": "Ügyelő Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rövid/Hosszú",
+              "displayName": "Rövid/Hosszú",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Életkora",
+              "displayName": "Életkora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Neme",
+              "displayName": "Neme",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nemi Identitása",
+              "displayName": "Nemi Identitása",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mióta Megkeresőnk",
+              "displayName": "Mióta Megkeresőnk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kivel él",
+              "displayName": "Kivel él",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen segítséget kapott",
+              "displayName": "Milyen segítséget kapott",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen szakemberrel áll most kapcsolatban",
+              "displayName": "Milyen szakemberrel áll most kapcsolatban",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Egyéb jellemzők",
+              "displayName": "Egyéb jellemzők",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        -96
+      ],
+      "id": "16b57eed-f2d3-48e7-893d-86d4e922aade",
+      "name": "Google Sheets2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fsinMfLSK3zax7c",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst fixedOutput = [];\n\nfor (const item of $input.all()) {\n  const data = {\n      \"Jegyzőkönyv Azonosító\": item.json.jegyzokonyv_azonosito,\n      \"Megkereső Neve\": item.json.megkereso_neve,\n      \"Csatorna\": item.json.csatorna,\n      \"Beszélgetés hossza\": item.json.hivas_hossza,\n      \"Létrehozva\": item.json.letrehozva,\n      \"Ügyelő Neve\": item.json.letrehozo_neve,\n      \"Rövid/Hosszú\":\n        item.json.rovid_hosszu === true ? \"Rövid\" : \"Hosszú\",\n      \"Életkora\": item.json.eletkor,\n      \"Neme\": item.json.nem,\n      \"Nemi Identitása\":item.json.nemi_identitasa,\n      \"Mióta Megkeresőnk\": item.json.miota_megkeresonk,\n      \"Kivel él\": item.json.kivel_el,\n      \"Milyen segítséget kapott\": item.json.segitseg_listanezet,\n      \"Milyen szakemberrel áll most kapcsolatban\": item.json.szakember_listanezet\n      ,\n      \"Egyéb jellemzők\": item.json.jellemzok_listanezet,\n    };\n  fixedOutput.push(data)\n}\n\nreturn fixedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -96
+      ],
+      "id": "80783150-0f4f-4949-bad4-8e2c6f10f658",
+      "name": "Sima"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst fixedOutput = [{}];\n\nfor (const item of $input.all()) {\n  const temakArray = item.json.temak_listanezet.split(\", \");\n  temakArray.forEach((fotema) => {\n    const data = {\n      \"Jegyzőkönyv Azonosító\": item.json.jegyzokonyv_azonosito,\n      \"Ügyelő Neve\": item.json.letrehozo_neve,\n      \"Csatorna\": item.json.csatorna,\n      \"Neme\": item.json.nemi_identitasa,\n      \"Életkora\": item.json.eletkor,\n      \"Rövid/Hosszú\":\n        item.json.rovid_hosszu === true ? \"Rövid\" : \"Hosszú\",\n      \"Megkereső Neve\": item.json.megkereso_neve,\n      \"Mióta Megkeresőnk\": item.json.miota_megkeresonk,\n      \"Létrehozva\": item.json.letrehozva,\n      \"Főtéma\": fotema,\n      \"Beszélgetés hossza\": item.json.hivas_hossza,\n      \"Kivel él\": item.json.kivel_el,\n      \"Milyen segítséget kapott\": item.json.segitseg_listanezet,\n    };\n  fixedOutput.push(data)\n  })\n}\n\nfixedOutput.shift()\n\nreturn fixedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -256
+      ],
+      "id": "78be089e-7fd9-45d2-b7a0-6af49c616786",
+      "name": "Fotemak"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ",
+          "mode": "list",
+          "cachedResultName": "Jegyzőkönyv adatok 2024.10-től",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1036409422,
+          "mode": "list",
+          "cachedResultName": "jegyzo_fotema-filter",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit#gid=1036409422"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "2 főtéma együtt szerepel",
+              "displayName": "2 főtéma együtt szerepel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Egészség",
+              "displayName": "Egészség",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Bánt. Offline",
+              "displayName": "Bánt. Offline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Jegyzőkönyv Azonosító",
+              "displayName": "Jegyzőkönyv Azonosító",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkereső Neve",
+              "displayName": "Megkereső Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Csatorna",
+              "displayName": "Csatorna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beszélgetés hossza",
+              "displayName": "Beszélgetés hossza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Létrehozva",
+              "displayName": "Létrehozva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ügyelő Neve",
+              "displayName": "Ügyelő Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rövid/Hosszú",
+              "displayName": "Rövid/Hosszú",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Életkora",
+              "displayName": "Életkora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Neme",
+              "displayName": "Neme",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nemi Identitása",
+              "displayName": "Nemi Identitása",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mióta Megkeresőnk",
+              "displayName": "Mióta Megkeresőnk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kivel él",
+              "displayName": "Kivel él",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Főtémák",
+              "displayName": "Főtémák",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen segítséget kapott",
+              "displayName": "Milyen segítséget kapott",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen szakemberrel áll most kapcsolatban",
+              "displayName": "Milyen szakemberrel áll most kapcsolatban",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Egyéb jellemzők",
+              "displayName": "Egyéb jellemzők",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Szűrő Oszlop1",
+              "displayName": "Szűrő Oszlop1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Szűrő Oszlop2",
+              "displayName": "Szűrő Oszlop2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Szűrő Oszlop3",
+              "displayName": "Szűrő Oszlop3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        64
+      ],
+      "id": "ffc11116-016e-42c7-88d3-c92f511484ed",
+      "name": "Google Sheets3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fsinMfLSK3zax7c",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst fixedOutput = [];\n\nfor (const item of $input.all()) {\n  const data = {\n      \"Szűrő Oszlop1\": \"\",\n      \"Szűrő Oszlop2\": \"\",\n      \"Szűrő Oszlop3\": \"\",\n      \"Jegyzőkönyv Azonosító\": item.json.jegyzokonyv_azonosito,\n      \"Megkereső Neve\": item.json.megkereso_neve,\n      \"Csatorna\": item.json.csatorna,\n      \"Beszélgetés hossza\": item.json.hivas_hossza,\n      \"Létrehozva\": item.json.letrehozva,\n      \"Ügyelő Neve\": item.json.letrehozo_neve,\n      \"Rövid/Hosszú\":\n        item.json.rovid_hosszu === true ? \"Rövid\" : \"Hosszú\",\n      \"Életkora\": item.json.eletkor,\n      \"Neme\": item.json.nem,\n      \"Nemi Identitása\":item.json.nemi_identitasa,\n      \"Mióta Megkeresőnk\": item.json.miota_megkeresonk,\n      \"Kivel él\": item.json.kivel_el,\n      \"Főtémák\": item.json.temak_listanezet,\n      \"Milyen segítséget kapott\": item.json.segitseg_listanezet,\n      \"Milyen szakemberrel áll most kapcsolatban\": item.json.szakember_listanezet\n      ,\n      \"Egyéb jellemzők\": item.json.jellemzok_listanezet,\n    };\n  fixedOutput.push(data)\n}\n\nreturn fixedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        64
+      ],
+      "id": "5f34e754-adf4-4ab1-acd1-708765ccd201",
+      "name": "Fotema_Filter"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    i.*,\n    COALESCE(\n        json_agg(j) FILTER (WHERE j.id IS NOT NULL), \n        '[]'\n    ) AS jegyzokonyvek\nFROM intervencio i\nLEFT JOIN jegyzokonyv j ON i.id = j.intervencio\nWHERE \n    i.letrehozva >= (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '62 minutes' AND \n    i.letrehozva < (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 minutes'\nGROUP BY i.id\nLIMIT 20;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        144,
+        224
+      ],
+      "id": "0ceb9ccf-11f5-44e0-ac97-cf6183dae2da",
+      "name": "Postgres_Inter",
+      "credentials": {
+        "postgres": {
+          "id": "3GNNGreiT9dnKJfx",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ",
+          "mode": "list",
+          "cachedResultName": "Jegyzőkönyv adatok 2024.10-től",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1034768835,
+          "mode": "list",
+          "cachedResultName": "intervencio_sima",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit#gid=1034768835"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Intervenció Azonosító",
+              "displayName": "Intervenció Azonosító",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Létrehozva",
+              "displayName": "Létrehozva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Csatorna",
+              "displayName": "Csatorna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkeresés típusa",
+              "displayName": "Megkeresés típusa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkereső életkora",
+              "displayName": "Megkereső életkora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nemi identitása",
+              "displayName": "Nemi identitása",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mióta a megkeresőnk",
+              "displayName": "Mióta a megkeresőnk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kivel él",
+              "displayName": "Kivel él",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beszélgetés hossza",
+              "displayName": "Beszélgetés hossza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Jelzés Témája",
+              "displayName": "Jelzés Témája",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen segítséget kapott",
+              "displayName": "Milyen segítséget kapott",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen szakemberrel áll most kapcsolatban",
+              "displayName": "Milyen szakemberrel áll most kapcsolatban",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "jelzés témája",
+              "displayName": "jelzés témája",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        224
+      ],
+      "id": "9309276b-8fef-4309-b1eb-40a5c7fd56c0",
+      "name": "Google Sheets4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fsinMfLSK3zax7c",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst fixedOutput = [];\n\nconst convertJelzesTema = (jelArray) => {\n  if (jelArray === null || jelArray === undefined) return \"\";\n  if (jelArray.length < 1) return \"\";\n  const newArray = [\"\"];\n  jelArray.forEach((e)=> {\n    newArray.push(e.substring(3).replaceAll(\"_\", \" \"))\n  })\n    newArray.shift()\n  return newArray.join(\", \");\n}\n\nfor (const item of $input.all()) {\n  \n  const data = {\n      \"Intervenció Azonosító\": item.json.intervencio_azonosito,\n      \"Létrehozva\": item.json.letrehozva,\n      \"Csatorna\": item.json.csatorna,\n      \"Megkeresés típusa\": item.json.jegyzokonyvek[0]?.megkereses_tipus,\n      \"Megkereső életkora\": item.json.jegyzokonyvek[0]?.eletkor,\n      \"Nemi identitása\": item.json.jegyzokonyvek[0]?.nemi_identitasa,\n      \"Mióta a megkeresőnk\": item.json.jegyzokonyvek[0]?.miota_megkeresonk,\n      \"Kivel él\": item.json.jegyzokonyvek[0]?.kivel_el,\n      \"Beszélgetés hossza\": item.json.jegyzokonyvek[0]?.hivas_hossza,\n      \"Jelzés Témája\": convertJelzesTema(item.json.jelzes_temaja),\n      \"Milyen segítséget kapott\": item.json.jegyzokonyvek[0]?.segitseg_listanezet,\n      \"Milyen szakemberrel áll most kapcsolatban\": item.json.jegyzokonyvek[0]?.szakember_listanezet,\n    };\n  fixedOutput.push(data)\n}\n\nreturn fixedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        224
+      ],
+      "id": "a1a4275e-75e9-4ca0-91b7-49a0ca702aea",
+      "name": "Inter_Sima"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "triggerAtMinute": 35
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "70b43622-6559-410f-956e-116367fea832",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    i.*,\n    COALESCE(\n        json_agg(j) FILTER (WHERE j.id IS NOT NULL), \n        '[]'\n    ) AS jegyzokonyvek\nFROM intervencio i\nLEFT JOIN jegyzokonyv j ON i.id = j.intervencio\nWHERE \n    -- i.letrehozva >= (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '62 minutes' AND \n    -- i.letrehozva < (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 minutes'\n    i.letrehozva\nBETWEEN\n  '2025-08-13T00:00:00.000Z' AND '2025-08-15T00:00:00.000Z'\nGROUP BY i.id\nLIMIT 10;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        144,
+        1104
+      ],
+      "id": "2b64931d-f096-4f05-a63d-a9a613681b5d",
+      "name": "Postgres_Inter1",
+      "credentials": {
+        "postgres": {
+          "id": "3GNNGreiT9dnKJfx",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ",
+          "mode": "list",
+          "cachedResultName": "Jegyzőkönyv adatok 2024.10-től",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1034768835,
+          "mode": "list",
+          "cachedResultName": "intervencio_sima",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit#gid=1034768835"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Intervenció Azonosító",
+              "displayName": "Intervenció Azonosító",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Létrehozva",
+              "displayName": "Létrehozva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Csatorna",
+              "displayName": "Csatorna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkeresés típusa",
+              "displayName": "Megkeresés típusa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkereső életkora",
+              "displayName": "Megkereső életkora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nemi identitása",
+              "displayName": "Nemi identitása",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mióta a megkeresőnk",
+              "displayName": "Mióta a megkeresőnk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kivel él",
+              "displayName": "Kivel él",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beszélgetés hossza",
+              "displayName": "Beszélgetés hossza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Jelzés Témája",
+              "displayName": "Jelzés Témája",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen segítséget kapott",
+              "displayName": "Milyen segítséget kapott",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen szakemberrel áll most kapcsolatban",
+              "displayName": "Milyen szakemberrel áll most kapcsolatban",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "jelzés témája",
+              "displayName": "jelzés témája",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        1104
+      ],
+      "id": "2f6dd19a-2049-4c3a-a3d7-3324fa85abe4",
+      "name": "Google Sheets5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fsinMfLSK3zax7c",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst fixedOutput = [];\n\nconst convertJelzesTema = (jelArray) => {\n  if (jelArray === null || jelArray === undefined) return \"\";\n  if (jelArray.length < 1)return \"\";\n  const newArray = [\"\"];\n  jelArray.forEach((e)=> {\n    newArray.push(e.substring(3).replaceAll(\"_\", \" \"))\n  })\n    newArray.shift()\n  return newArray.join(\", \");\n}\n\nfor (const item of $input.all()) {\n  \n  const data = {\n      \"Intervenció Azonosító\": item.json.intervencio_azonosito,\n      \"Létrehozva\": item.json.letrehozva,\n      \"Csatorna\": item.json.csatorna,\n      \"Megkeresés típusa\": item.json.jegyzokonyvek[0]?.megkereses_tipus,\n      \"Megkereső életkora\": item.json.jegyzokonyvek[0]?.eletkor,\n      \"Nemi identitása\": item.json.jegyzokonyvek[0]?.nemi_identitasa,\n      \"Mióta a megkeresőnk\": item.json.jegyzokonyvek[0]?.miota_megkeresonk,\n      \"Kivel él\": item.json.jegyzokonyvek[0]?.kivel_el,\n      \"Beszélgetés hossza\": item.json.jegyzokonyvek[0]?.hivas_hossza,\n      \"Jelzés Témája\": convertJelzesTema(item.json.jelzes_temaja),\n      \"Milyen segítséget kapott\": item.json.jegyzokonyvek[0]?.segitseg_listanezet,\n      \"Milyen szakemberrel áll most kapcsolatban\": item.json.jegyzokonyvek[0]?.szakember_listanezet,\n    };\n  fixedOutput.push(data)\n}\n\nreturn fixedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        1104
+      ],
+      "id": "948bfd24-f161-49cb-a667-67ff4467e87b",
+      "name": "Inter_Sima1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM jegyzokonyv\nWHERE \n    -- letrehozva >= (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '62 minutes' AND \n    -- letrehozva < (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 minutes'\n  letrehozva\nBETWEEN\n  '2025-05-01T00:00:00.000Z' AND '2025-06-01T00:00:00.000Z'\nGROUP BY id\nLIMIT 2000;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        144,
+        688
+      ],
+      "id": "5a087b7f-b6ab-4eba-b993-8b077665bb64",
+      "name": "Postgres_Jegyzo1",
+      "credentials": {
+        "postgres": {
+          "id": "3GNNGreiT9dnKJfx",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst fixedOutput = [{}];\n\nconst temak = [\n  {\n    fotema: \"Család\",\n    altemak: [\n      \"Beszélgetés a családról\",\n      \"Betegség a családban\",\n      \"Családi konfliktus\",\n      \"Családtagért érzett aggodalom\",\n      \"Családtag halála\",\n      \"Kisállattal kapcsolatos probléma vagy történet\",\n      \"Mozaikcsalád probléma\",\n      \"Szülők válnak, különélnek\",\n      \"Pszichiátriai vagy addiktológiai betegség a családban\",\n    ],\n  },\n  {\n    fotema: \"Párkapcsolat\",\n    altemak: [\n      \"Beszélgetés a párkapcsolatról\",\n      \"Ismerkedés, párválasztás\",\n      \"Konfliktusok a párkapcsolatban\",\n      \"Párkapcsolat kiskorú és felnőtt között\",\n      \"Szakítás\",\n      \"Tiltott-titkolt kapcsolat\",\n    ],\n  },\n  {\n    fotema: \"Iskola\",\n    altemak: [\n      \"Beszélgetés iskoláról\",\n      \"Konfliktus tanárokkal, szabályokkal\",\n      \"Szükségletre reagáló oktatás hiánya\",\n      \"Teljesítmény\",\n      \"Továbbtanulás\",\n    ],\n  },\n  {\n    fotema: \"Kortársak\",\n    altemak: [\n      \"Barátság elvesztése\",\n      \"Beszélgetés kortársakról, barátokról\",\n      \"Kortársak közötti konfliktusok\",\n      \"Sport, hobbi\",\n    ],\n  },\n  {\n    fotema: \"Bántalmazás, erőszak (offline)\",\n    altemak: [\n      \"Családon belüli bántalmazás más családtaggal szemben\",\n      \"Elhanyagolás családon belül\",\n      \"Elhanyagolás intézményben\",\n      \"Érzelmi bántalmazás a családon belül\",\n      \"Érzelmi bántalmazás egyéb színtéren\",\n      \"Érzelmi bántalmazás kortársak között\",\n      \"Érzelmi bántalmazás párkapcsolatban\",\n      \"Kapcsolati erőszak a szülők között\",\n      \"Közvetlen fizikai bántalmazás a családon belül\",\n      \"Közvetlen fizikai bántalmazás egyéb színtéren\",\n      \"Közvetlen fizikai bántalmazás intézményben felnőttektől\",\n      \"Közvetlen fizikai bántalmazás kortársak között\",\n      \"Közvetlen fizikai bántalmazás párkapcsolatban\",\n      \"Szexuális bántalmazás családon belül\",\n      \"Szexuális bántalmazás intézményben felnőttektől\",\n      \"Szexuális bántalmazás kortársak között\",\n      \"Szexuális bántalmazás máshol\",\n      \"Szexuális bántalmazás párkapcsolatban\",\n      \"Érzelmi bántalmazás intézményben\",\n    ],\n  },\n  {\n    fotema: \"Internet, mobil\",\n    altemak: [\n      \"Általános kérdés internetbiztonsággal kapcsolatban\",\n      \"Gaming\",\n      \"Internetfüggőség\",\n      \"Káros tartalmak\",\n      \"Online ismerkedés\",\n      \"AI-vel kapcsolatos tapasztalat, kérdés\",\n      \"AI (ChatGPT vagy egyéb AI alkalmazás) mint beszélgetőtárs\",\n    ],\n  },\n  {\n    fotema: \"Online bántalmazás, visszaélés\",\n    altemak: [\n      \"Adathalászat,adatokkal való visszaélés\",\n      \"Grooming\",\n      \"Gyermekkel való szexuális visszaélést ábrázoló tartalom\",\n      \"Internetes zaklatás, cyberbullying\",\n      \"Képpel való visszaélés\",\n      \"Sexting\",\n      \"Szextortion\",\n    ],\n  },\n  {\n    fotema: \"Önagresszió veszélye\",\n    altemak: [\n      \"Akut öngyilkossági kísérlet\",\n      \"Akut önsértés (nem szuicid szándékkal)\",\n      \"Öngyilkossági gondolat\",\n      \"Öngyilkossági késztetés\",\n      \"Önsértés\",\n      \"Önsértés gondolata\",\n      \"Egyéb Önagresszió\",\n    ],\n  },\n  {\n    fotema: \"Egészség-betegség\",\n    altemak: [\n      \"Agresszív késztetések\",\n      \"Általános lehangoltság\",\n      \"Bűntudat, megbánás\",\n      \"Diagnosztizált pszichés betegség\",\n      \"Evészavarok\",\n      \"Indulatkontroll zavar\",\n      \"Magány\",\n      \"Másért való aggódás\",\n      \"Önértékelési probléma\",\n      \"Öngyilkosság mint téma\",\n      \"Pánik jellegű tünetek\",\n      \"Pozitív érzelmek megosztás\",\n      \"Pszichés ellátás\",\n      \"Pszichés ellátás hiánya\",\n      \"Szomatikus betegség\",\n      \"Szorongás, félelmek\",\n      \"Veszteség, gyász\",\n      \"Vetélés\",\n    ],\n  },\n  {\n    fotema: \"Előítélet, diszkrimináció\",\n    altemak: [\n      \"Előítéletes hívó\",\n      \"Fogyatékosság\",\n      \"LMBTQIA\",\n      \"Menekült\",\n      \"Roma\",\n      \"Egyéb kisebbség\",\n    ],\n  },\n  {\n    fotema: \"Eltűnés, szökés, csellengés\",\n    altemak: [\n      \"Azon gondolkodik, hogy elszökik gyerekotthonból\",\n      \"Azon gondolkodik, hogy elszökik hivatásos nevelőszülőktől\",\n      \"Azon gondolkodik, hogy elszökik otthonról\",\n      \"Csellengés,iskolából lógás\",\n      \"Gyermekotthonból szökött\",\n      \"Jogellenes elvitel\",\n      \"Kísérő nélküli kiskorú\",\n      \"Nemzetközi gyermekeltűnés\",\n      \"Otthonról szökött\",\n      \"Egyéb eltűnés, szökés, csellengés\",\n    ],\n  },\n  {\n    fotema: \"Szerhasználat, függőség\",\n    altemak: [\n      \"Alkohollal való visszaélés, alkoholizmus\",\n      \"Buli-party ártalom\",\n      \"Cigarettázás\",\n      \"Drog kipróbálása\",\n      \"Drog rendszeres használata, drogfüggőség\",\n      \"Gyógyszerekkel való visszaélés\",\n      \"Szerencsejáték, játék\",\n      \"Pornográf tartalmak\",\n      \"Egyéb függőség\",\n    ],\n  },\n  {\n    fotema: \"Alapszükségletek\",\n    altemak: [\"Anyagi nehézség\", \"Lakhatási probléma,hajléktalanság\"],\n  },\n  {\n    fotema: \"Szexualitás\",\n    altemak: [\n      \"Abortusz\",\n      \"Első szexuális tapasztalatok\",\n      \"Fogamzásgátlás, védekezés\",\n      \"Menstruáció\",\n      \"Nemi identitás\",\n      \"Serdülőkori változások\",\n      \"Szexuális orientáció\",\n      \"Terhesség\",\n      \"Egyéb szexszel kapcsolatos kérdések\",\n    ],\n  },\n  {\n    fotema: \"Jogi probléma\",\n    altemak: [\n      \"Büntetendő tett áldozata\",\n      \"Büntetendő tett elkövetése\",\n      \"Büntetendő tett szemtanúja\",\n      \"Gyerekek kiemelése a családból\",\n      \"Gyerekvédelemmel kapcsolatos kérdés\",\n      \"Válással kapcsolatos jogi probléma\",\n    ],\n  },\n  {\n    fotema: \"Munka\",\n    altemak: [\"Diákmunka\", \"Munkát keres\", \"Probléma a munkahelyen\"],\n  },\n  {\n    fotema: \"Kék vonal\",\n    altemak: [\n      \"Keretek, szabályok\",\n      \"Kérdés\",\n      \"Panasz\",\n      \"Próba\",\n      \"Visszajelzés\",\n    ],\n  },\n];\n\nconst getFotema = (altema) => {\n  if (!altema) return \"\";\n\n  for (const tema of temak) {\n    if (tema.altemak.includes(altema)) {\n      return tema.fotema;\n    }\n  }\n\n  return \"\";\n};\n\nfor (const item of $input.all()) {\n  const altemakArray = item.json.altemak_listanezet.split(\"; \");\n  altemakArray.forEach((altema) => {\n    const data = {\n      \"Jegyzőkönyv Azonosító\": item.json.jegyzokonyv_azonosito,\n      \"Ügyelő Neve\": item.json.letrehozo_neve,\n      \"Csatorna\": item.json.csatorna,\n      \"Neme\": item.json.nemi_identitasa,\n      \"Életkora\": item.json.eletkor,\n      \"Rövid/Hosszú\":\n        item.json.rovid_hosszu === true ? \"Rövid\" : \"Hosszú\",\n      \"Megkereső Neve\": item.json.megkereso_neve,\n      \"Mióta Megkeresőnk\": item.json.miota_megkeresonk,\n      \"Létrehozva\": item.json.letrehozva,\n      \"Főtéma\": getFotema(altema),\n      \"Altéma\": altema,\n      \"Beszélgetés hossza\": item.json.hivas_hossza,\n      \"Kivel él\": item.json.kivel_el,\n      \"Milyen segítséget kapott\": item.json.segitseg_listanezet,\n    };\n  fixedOutput.push(data)\n  })\n}\n\nfixedOutput.shift();\n\nreturn fixedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        448
+      ],
+      "id": "0035ab7b-0d7c-4689-8655-c22972bb2532",
+      "name": "Altemak1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ",
+          "mode": "list",
+          "cachedResultName": "Jegyzőkönyv adatok 2024.10-től",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "jegyzo_altemak",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Jegyzőkönyv Azonosító",
+              "displayName": "Jegyzőkönyv Azonosító",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ügyelő Neve",
+              "displayName": "Ügyelő Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Csatorna",
+              "displayName": "Csatorna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Neme",
+              "displayName": "Neme",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Életkora",
+              "displayName": "Életkora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rövid/Hosszú",
+              "displayName": "Rövid/Hosszú",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkereső Neve",
+              "displayName": "Megkereső Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mióta Megkeresőnk",
+              "displayName": "Mióta Megkeresőnk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Létrehozva",
+              "displayName": "Létrehozva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Főtéma",
+              "displayName": "Főtéma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Altéma",
+              "displayName": "Altéma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beszélgetés hossza",
+              "displayName": "Beszélgetés hossza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kivel él",
+              "displayName": "Kivel él",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        448
+      ],
+      "id": "e514b2b8-6e8a-4d3d-aa75-36c8469eedde",
+      "name": "Google Sheets6",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fsinMfLSK3zax7c",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ",
+          "mode": "list",
+          "cachedResultName": "Jegyzőkönyv adatok 2024.10-től",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 671073918,
+          "mode": "list",
+          "cachedResultName": "jegyzo_fotemak",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit#gid=671073918"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Jegyzőkönyv Azonosító",
+              "displayName": "Jegyzőkönyv Azonosító",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ügyelő Neve",
+              "displayName": "Ügyelő Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Csatorna",
+              "displayName": "Csatorna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Neme",
+              "displayName": "Neme",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Életkora",
+              "displayName": "Életkora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rövid/Hosszú",
+              "displayName": "Rövid/Hosszú",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkereső Neve",
+              "displayName": "Megkereső Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mióta Megkeresőnk",
+              "displayName": "Mióta Megkeresőnk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Létrehozva",
+              "displayName": "Létrehozva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Főtéma",
+              "displayName": "Főtéma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beszélgetés hossza",
+              "displayName": "Beszélgetés hossza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kivel él",
+              "displayName": "Kivel él",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        608
+      ],
+      "id": "67e3b0e2-6d90-4b0d-9a5f-e234caced399",
+      "name": "Google Sheets7",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fsinMfLSK3zax7c",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ",
+          "mode": "list",
+          "cachedResultName": "Jegyzőkönyv adatok 2024.10-től",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1867637896,
+          "mode": "list",
+          "cachedResultName": "jegyzo_sima",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit#gid=1867637896"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Jegyzőkönyv Azonosító",
+              "displayName": "Jegyzőkönyv Azonosító",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkereső Neve",
+              "displayName": "Megkereső Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Csatorna",
+              "displayName": "Csatorna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beszélgetés hossza",
+              "displayName": "Beszélgetés hossza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Létrehozva",
+              "displayName": "Létrehozva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ügyelő Neve",
+              "displayName": "Ügyelő Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rövid/Hosszú",
+              "displayName": "Rövid/Hosszú",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Életkora",
+              "displayName": "Életkora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Neme",
+              "displayName": "Neme",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nemi Identitása",
+              "displayName": "Nemi Identitása",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mióta Megkeresőnk",
+              "displayName": "Mióta Megkeresőnk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kivel él",
+              "displayName": "Kivel él",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen segítséget kapott",
+              "displayName": "Milyen segítséget kapott",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen szakemberrel áll most kapcsolatban",
+              "displayName": "Milyen szakemberrel áll most kapcsolatban",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Egyéb jellemzők",
+              "displayName": "Egyéb jellemzők",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        768
+      ],
+      "id": "8c0453f0-f2e9-4205-ac3a-08f661912858",
+      "name": "Google Sheets8",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fsinMfLSK3zax7c",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst fixedOutput = [];\n\nfor (const item of $input.all()) {\n  const data = {\n      \"Jegyzőkönyv Azonosító\": item.json.jegyzokonyv_azonosito,\n      \"Megkereső Neve\": item.json.megkereso_neve,\n      \"Csatorna\": item.json.csatorna,\n      \"Beszélgetés hossza\": item.json.hivas_hossza,\n      \"Létrehozva\": item.json.letrehozva,\n      \"Ügyelő Neve\": item.json.letrehozo_neve,\n      \"Rövid/Hosszú\":\n        item.json.rovid_hosszu === true ? \"Rövid\" : \"Hosszú\",\n      \"Életkora\": item.json.eletkor,\n      \"Neme\": item.json.nem,\n      \"Nemi Identitása\":item.json.nemi_identitasa,\n      \"Mióta Megkeresőnk\": item.json.miota_megkeresonk,\n      \"Kivel él\": item.json.kivel_el,\n      \"Milyen segítséget kapott\": item.json.segitseg_listanezet,\n      \"Milyen szakemberrel áll most kapcsolatban\": item.json.szakember_listanezet\n      ,\n      \"Egyéb jellemzők\": item.json.jellemzok_listanezet,\n    };\n  fixedOutput.push(data)\n}\n\nreturn fixedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        768
+      ],
+      "id": "1bbf7fcb-ad98-4927-9f6f-731da6a07184",
+      "name": "Sima1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst fixedOutput = [{}];\n\nfor (const item of $input.all()) {\n  const temakArray = item.json.temak_listanezet.split(\", \");\n  temakArray.forEach((fotema) => {\n    const data = {\n      \"Jegyzőkönyv Azonosító\": item.json.jegyzokonyv_azonosito,\n      \"Ügyelő Neve\": item.json.letrehozo_neve,\n      \"Csatorna\": item.json.csatorna,\n      \"Neme\": item.json.nemi_identitasa,\n      \"Életkora\": item.json.eletkor,\n      \"Rövid/Hosszú\":\n        item.json.rovid_hosszu === true ? \"Rövid\" : \"Hosszú\",\n      \"Megkereső Neve\": item.json.megkereso_neve,\n      \"Mióta Megkeresőnk\": item.json.miota_megkeresonk,\n      \"Létrehozva\": item.json.letrehozva,\n      \"Főtéma\": fotema,\n      \"Beszélgetés hossza\": item.json.hivas_hossza,\n      \"Kivel él\": item.json.kivel_el,\n      \"Milyen segítséget kapott\": item.json.segitseg_listanezet,\n    };\n  fixedOutput.push(data)\n  })\n}\n\nfixedOutput.shift()\n\nreturn fixedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        608
+      ],
+      "id": "820e3c99-fbb2-4efd-a93e-bcfbfb29830f",
+      "name": "Fotemak1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ",
+          "mode": "list",
+          "cachedResultName": "Jegyzőkönyv adatok 2024.10-től",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1036409422,
+          "mode": "list",
+          "cachedResultName": "jegyzo_fotema-filter",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DNKX2j07xZLm_7VdaNCdKT4TnxCI-JlEwA5FzNgxSVQ/edit#gid=1036409422"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "2 főtéma együtt szerepel",
+              "displayName": "2 főtéma együtt szerepel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Egészség",
+              "displayName": "Egészség",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Bánt. Offline",
+              "displayName": "Bánt. Offline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Jegyzőkönyv Azonosító",
+              "displayName": "Jegyzőkönyv Azonosító",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Megkereső Neve",
+              "displayName": "Megkereső Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Csatorna",
+              "displayName": "Csatorna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beszélgetés hossza",
+              "displayName": "Beszélgetés hossza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Létrehozva",
+              "displayName": "Létrehozva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ügyelő Neve",
+              "displayName": "Ügyelő Neve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rövid/Hosszú",
+              "displayName": "Rövid/Hosszú",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Életkora",
+              "displayName": "Életkora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Neme",
+              "displayName": "Neme",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nemi Identitása",
+              "displayName": "Nemi Identitása",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mióta Megkeresőnk",
+              "displayName": "Mióta Megkeresőnk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kivel él",
+              "displayName": "Kivel él",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Főtémák",
+              "displayName": "Főtémák",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen segítséget kapott",
+              "displayName": "Milyen segítséget kapott",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Milyen szakemberrel áll most kapcsolatban",
+              "displayName": "Milyen szakemberrel áll most kapcsolatban",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Egyéb jellemzők",
+              "displayName": "Egyéb jellemzők",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Szűrő Oszlop1",
+              "displayName": "Szűrő Oszlop1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Szűrő Oszlop2",
+              "displayName": "Szűrő Oszlop2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Szűrő Oszlop3",
+              "displayName": "Szűrő Oszlop3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        928
+      ],
+      "id": "704832d3-dcbf-4233-862d-d900bbb94251",
+      "name": "Google Sheets9",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fsinMfLSK3zax7c",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst fixedOutput = [];\n\nfor (const item of $input.all()) {\n  const data = {\n      \"Szűrő Oszlop1\": \"\",\n      \"Szűrő Oszlop2\": \"\",\n      \"Szűrő Oszlop3\": \"\",\n      \"Jegyzőkönyv Azonosító\": item.json.jegyzokonyv_azonosito,\n      \"Megkereső Neve\": item.json.megkereso_neve,\n      \"Csatorna\": item.json.csatorna,\n      \"Beszélgetés hossza\": item.json.hivas_hossza,\n      \"Létrehozva\": item.json.letrehozva,\n      \"Ügyelő Neve\": item.json.letrehozo_neve,\n      \"Rövid/Hosszú\":\n        item.json.rovid_hosszu === true ? \"Rövid\" : \"Hosszú\",\n      \"Életkora\": item.json.eletkor,\n      \"Neme\": item.json.nem,\n      \"Nemi Identitása\":item.json.nemi_identitasa,\n      \"Mióta Megkeresőnk\": item.json.miota_megkeresonk,\n      \"Kivel él\": item.json.kivel_el,\n      \"Főtémák\": item.json.temak_listanezet,\n      \"Milyen segítséget kapott\": item.json.segitseg_listanezet,\n      \"Milyen szakemberrel áll most kapcsolatban\": item.json.szakember_listanezet\n      ,\n      \"Egyéb jellemzők\": item.json.jellemzok_listanezet,\n    };\n  fixedOutput.push(data)\n}\n\nreturn fixedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        928
+      ],
+      "id": "ca8ffc11-bb57-40eb-9111-9d970780e48e",
+      "name": "Fotema_Filter1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Postgres_Inter1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Postgres_Jegyzo1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres_Jegyzo": {
+      "main": [
+        [
+          {
+            "node": "Altemak",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fotemak",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sima",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fotema_Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Altemak": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sima": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fotemak": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fotema_Filter": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres_Inter": {
+      "main": [
+        [
+          {
+            "node": "Inter_Sima",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inter_Sima": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Postgres_Jegyzo",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Postgres_Inter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres_Inter1": {
+      "main": [
+        [
+          {
+            "node": "Inter_Sima1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inter_Sima1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres_Jegyzo1": {
+      "main": [
+        [
+          {
+            "node": "Altemak1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fotemak1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sima1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fotema_Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Altemak1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sima1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fotemak1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fotema_Filter1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cf25be28-42d0-484a-bc9d-978612baa31c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e9d2e1277c8727c7d7b07f7729da24851f77c9edc77fa174a501e2ac6a60fa77"
+  },
+  "id": "YRHpaXL1IVi3Ds4Q",
+  "tags": []
+}

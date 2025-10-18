@@ -17,8 +17,11 @@ package-lock.json
 apps/directus/uploads/*
 !apps/directus/uploads/.gitkeep
 
-# n8n data
+# n8n data and database (contains credentials)
 n8n_data/
+apps/n8n/database.sqlite
+apps/n8n/database.sqlite-*
+apps/n8n/config
 
 # Logs
 *.log
