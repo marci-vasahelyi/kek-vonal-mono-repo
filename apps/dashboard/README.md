@@ -4,6 +4,7 @@ Interactive data visualization dashboard for Kék Vonal psychological support co
 
 ## Features
 
+- **🔐 Password Protected**: Secure access with simple password authentication
 - **📈 Trends**: Monthly, weekly, and hourly contact patterns
 - **👥 Demographics**: Gender distribution and age analysis
 - **📞 Channels**: Contact method breakdown and trends
@@ -37,7 +38,12 @@ POSTGRES_PASSWORD=your_password
 POSTGRES_DB=directus
 DB_HOST=192.168.1.100  # or localhost for local dev
 DB_PORT=5432
+
+# ⚠️ IMPORTANT: Set dashboard password
+DASHBOARD_PASSWORD=your_strong_password
 ```
+
+**Authentication**: The dashboard requires a password to access. Set `DASHBOARD_PASSWORD` in your `.env` file. The login screen will appear before any data is loaded.
 
 ### 3. Run Dashboard
 

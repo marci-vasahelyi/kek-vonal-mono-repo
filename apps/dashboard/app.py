@@ -8,6 +8,11 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime, timedelta
 from data_loader import load_data, get_database_stats
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Page config
 st.set_page_config(
@@ -15,6 +20,47 @@ st.set_page_config(
     page_icon="📊",
     layout="wide"
 )
+
+# Initialize session state for authentication
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+
+# Authentication check
+def check_password():
+    """Returns True if the user entered the correct password."""
+    
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        if st.session_state["password"] == os.getenv("DASHBOARD_PASSWORD", "admin"):
+            st.session_state.authenticated = True
+            del st.session_state["password"]  # Don't store password
+        else:
+            st.session_state.authenticated = False
+
+    # Show password input if not authenticated
+    if not st.session_state.authenticated:
+        st.title("🔐 Kék Vonal - Dashboard Bejelentkezés")
+        st.text_input(
+            "Jelszó", 
+            type="password", 
+            on_change=password_entered, 
+            key="password",
+            help="Kérjük, adja meg a dashboard jelszót"
+        )
+        st.warning("⚠️ Kérjük, jelentkezzen be a dashboard eléréséhez")
+        return False
+    else:
+        return True
+
+# Check authentication before showing dashboard
+if not check_password():
+    st.stop()
+
+# Logout button in sidebar
+with st.sidebar:
+    if st.button("🚪 Kijelentkezés"):
+        st.session_state.authenticated = False
+        st.rerun()
 
 # Title
 st.title("📊 Kék Vonal - Megkeresések Dashboard")

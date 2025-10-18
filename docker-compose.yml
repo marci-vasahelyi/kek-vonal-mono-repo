@@ -98,6 +98,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD}
     depends_on:
       - database
     networks:
