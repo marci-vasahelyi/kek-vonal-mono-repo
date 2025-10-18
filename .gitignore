@@ -2,6 +2,7 @@
 .env
 .env.local
 .env.*.local
+production.env
 
 # Docker overrides (local development only)
 docker-compose.override.yml
