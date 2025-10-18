@@ -33,8 +33,11 @@ server {
     }
 
     location /dashboard/ {
-        proxy_pass http://localhost:8501/dashboard/;
+        proxy_pass http://localhost:8501/;
         include proxy_params;
+        
+        # Rewrite path
+        rewrite ^/dashboard/(.*)$ /$1 break;
 
         # WebSocket headers (required for Streamlit)
         proxy_http_version 1.1;
