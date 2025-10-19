@@ -142,10 +142,12 @@ Workflow automation tool for data exports and integrations.
 
 Interactive data visualization dashboard for mental health contact analytics.
 
-**Local**: http://localhost:8501 
-**Production**: http://jegyzokonyv.kek-vonal.cc:8501 (direct port access)
+**Local**: http://localhost:8501  
+**Production**: https://jegyzokonyv.kek-vonal.cc/dashboard/ (password protected, SSL encrypted)
 
+- ⚠️ **HTTPS REQUIRED** - Contains sensitive mental health data
 - Real-time PostgreSQL data visualization
+- Password protected access (set via `DASHBOARD_PASSWORD` in `.env`)
 - Filters: date range, főtéma, altéma, csatorna, életkor, nemi identitás
 - Monthly trends for 6 key mental health topics
 - Demographics, channels, and topics distribution
