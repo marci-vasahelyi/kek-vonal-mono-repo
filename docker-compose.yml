@@ -114,7 +114,7 @@ services:
       - ./backups:/backups
       # Mount gcloud credentials from host (production)
       # For local dev without GCS, create an empty directory: mkdir -p gcloud_config
-      - ${GCLOUD_CONFIG_PATH:-./gcloud_config}:/root/.config/gcloud:ro
+      - ${GCLOUD_CONFIG_PATH:-./gcloud_config}:/root/.config/gcloud
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
