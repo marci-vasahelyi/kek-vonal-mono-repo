@@ -112,9 +112,9 @@ services:
     restart: always
     volumes:
       - ./backups:/backups
-      # Optional: Mount Google Cloud credentials for GCS uploads
-      # Uncomment and set path to your service account key:
-      # - /path/to/gcloud-service-account.json:/gcloud-key.json:ro
+      # Mount gcloud credentials from host (production)
+      # For local dev without GCS, create an empty directory: mkdir -p gcloud_config
+      - ${GCLOUD_CONFIG_PATH:-./gcloud_config}:/root/.config/gcloud:ro
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -125,8 +125,6 @@ services:
       - BACKUP_DIR=/backups
       - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}
       - TZ=${TZ}
-      # Optional: Uncomment if mounting service account key
-      # - GOOGLE_APPLICATION_CREDENTIALS=/gcloud-key.json
     depends_on:
       - database
     networks:

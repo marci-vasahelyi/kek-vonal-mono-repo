@@ -63,6 +63,7 @@ infrastructure/ssl/*.crt
 **/credentials.json
 **/service-account*.json
 .gcloud/
+gcloud_config/
 
 # Backup directory from VM
 vm-backup/
