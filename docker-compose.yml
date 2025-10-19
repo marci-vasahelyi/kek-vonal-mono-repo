@@ -104,6 +104,34 @@ services:
     networks:
       - directus
 
+  backup:
+    container_name: backup
+    build:
+      context: ./apps/backup
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - ./backups:/backups
+      # Optional: Mount Google Cloud credentials for GCS uploads
+      # Uncomment and set path to your service account key:
+      # - /path/to/gcloud-service-account.json:/gcloud-key.json:ro
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - GCS_BUCKET=${GCS_BUCKET}
+      - BACKUP_DIR=/backups
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}
+      - TZ=${TZ}
+      # Optional: Uncomment if mounting service account key
+      # - GOOGLE_APPLICATION_CREDENTIALS=/gcloud-key.json
+    depends_on:
+      - database
+    networks:
+      - directus
+
 networks:
   directus:
     driver: bridge

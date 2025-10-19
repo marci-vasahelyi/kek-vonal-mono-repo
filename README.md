@@ -9,10 +9,10 @@ This monorepo contains everything needed to run and restore the KEK-VONAL infras
 - **Directus CMS** - Headless CMS for content management
 - **n8n** - Workflow automation tool
 - **Dashboard** - Streamlit-based analytics and visualization dashboard
+- **Backup Service** - Automated daily backups with cron (Docker-based)
 - **PostgreSQL + PostGIS** - Database with geographic extensions
 - **Redis** - Caching layer
 - **Nginx** - Reverse proxy with SSL termination
-- **Automated Backups** - Daily database backups to Google Cloud Storage
 
 ## 📁 Repository Structure
 
@@ -27,12 +27,17 @@ kek-vonal-mono-repo/
 │   ├── n8n/
 │   │   ├── workflows/         # Exported n8n workflows
 │   │   └── README.md          # n8n documentation
-│   └── dashboard/
-│       ├── app.py             # Main Streamlit app
-│       ├── data_loader.py     # Database connection
-│       ├── visualizations.py  # Chart functions
-│       ├── Dockerfile         # Dashboard container
-│       └── README.md          # Dashboard documentation
+│   ├── dashboard/
+│   │   ├── app.py             # Main Streamlit app
+│   │   ├── data_loader.py     # Database connection
+│   │   ├── Dockerfile         # Dashboard container
+│   │   └── README.md          # Dashboard documentation
+│   └── backup/
+│       ├── backup.sh          # Backup script
+│       ├── entrypoint.sh      # Container entrypoint
+│       ├── crontab            # Cron schedule
+│       ├── Dockerfile         # Backup container
+│       └── README.md          # Backup documentation
 ├── infrastructure/
 │   ├── nginx/
 │   │   ├── sites-available/   # Nginx site configurations
@@ -40,7 +45,7 @@ kek-vonal-mono-repo/
 │   ├── ssl/                   # SSL certificates (not in git)
 │   └── docker/                # Docker-related configs
 ├── scripts/
-│   ├── backup/                # Database backup scripts
+│   ├── backup/                # Legacy backup scripts
 │   ├── restore/               # Database restore scripts
 │   └── deployment/            # Deployment and setup scripts
 ├── docs/                      # Additional documentation
@@ -156,22 +161,39 @@ Interactive data visualization dashboard for mental health contact analytics.
 
 ## 💾 Backups and Restore
 
-### Creating a Backup
+### Automated Backup Service
+
+The monorepo includes a **dedicated backup service** that runs automatically:
+
+- ✅ **Runs daily at 3 AM** - Automated via cron inside Docker
+- ✅ **Starts with your stack** - No manual setup needed
+- ✅ **Visible failures** - Check logs with `docker-compose logs backup`
+- ✅ **Google Cloud Storage** - Optional automated uploads
+- ✅ **Auto-cleanup** - Removes old backups (default: 7 days)
+
+```bash
+# View backup logs
+docker-compose logs -f backup
+
+# Manually trigger a backup
+docker exec backup /app/backup.sh
+
+# List all backups
+ls -lh backups/
+```
+
+See [apps/backup/README.md](apps/backup/README.md) for detailed documentation.
+
+### Manual Backup (Legacy)
 
 ```bash
 ./scripts/backup/db-backup.sh
 ```
 
-This will:
-- Create a timestamped SQL dump
-- Compress it with gzip
-- Upload to Google Cloud Storage (if configured)
-- Keep local backups for 7 days
-
 ### Restoring from Backup
 
 ```bash
-./scripts/restore/db-restore.sh backups/directus_backup_YYYYMMDD.sql.gz
+./scripts/restore/db-restore.sh backups/directus_backup_YYYYMMDD_HHMMSS.sql.gz
 ```
 
 This will:
