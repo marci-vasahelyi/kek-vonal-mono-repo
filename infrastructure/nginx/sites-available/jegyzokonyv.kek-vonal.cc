@@ -33,7 +33,7 @@ server {
     }
 
     location /dashboard/ {
-        proxy_pass http://localhost:8501/;
+        proxy_pass http://localhost:8501/dashboard/;
         proxy_http_version 1.1;
         
         # WebSocket support (required for Streamlit)
